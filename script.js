@@ -20,10 +20,25 @@ function declensionPenny (number) {
 
 function declensionRoublePlusPenny (number) {
     let rouble = Math.trunc(number)
-    if(number.includes(".")) {
-        let penny = number.spl
+    let penny, text = ""
+    let numberToString = number.toString()
+    if( numberToString.includes(".") ) {
+        penny = numberToString.split(".")[1]
+        console.log(1, penny, numberToString)
+    } else if ( numberToString.includes(",") ) {
+        penny = numberToString.split(",")[1]
+        console.log(2)
     }
-    return penny[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]]
+    console.log(penny)
+    if ( penny.length == 1){
+        penny += "0"
+    }
+    if ( penny != "" ){
+        text = Math.trunc(number) + " " + declensionRouble(Math.trunc(number)) + " " + penny + " " + declensionPenny(penny)
+    } else {
+        text = Math.trunc(number) + " " + declensionRouble(Math.trunc(number))
+    }
+    return text
 }
 
 function declensionForeignCurrencies (number, currency) {
@@ -110,4 +125,29 @@ function declensionForeignCurrencies (number, currency) {
         currencyDeclensions = ["польский злотый", "польских злотых", "польских злотых"];
     }
     return currencyDeclensions[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]]
+}
+
+function indentifyCurrency(curr){
+    if(curr.match()){
+
+    }
+}
+
+//Обработка пользовательского запроса
+let userInput = ""
+let splittedUserInput = userInput.split(" ")
+let matchedCurrency, matchedNumber = []
+//Поиск упоминания валют
+for( i = 0; i < splittedUserInput.length; i++ ){
+    let regexAllCurrencies = /(доллар|бакс|евро|фунт|стерлинг|драм|армянск|юан|китайск|йен|японск|иен|тенг|тэнг|казахс|крон|норве|шведс|швец|франк|швейцар|манат|азерб|лира|турец|австрал|канад|чешск|чехи|гонкон|мексик|песо|новозел|зеланд|сингапур|дирх|оаэ|эмират|белорус|беларус|болгарск|лев|льва|грузи|лар|польск|злот)/gi
+    if( regexAllCurrencies.exec(splittedUserInput[i]) ){
+        matchedCurrency.push(splittedUserInput[i])
+    }
+}
+//Поиск чисел
+for ( i = 0; i < splittedUserInput.length; i++ ){
+    let regexNumber = /([0-9]+)/gm
+    if(regexNumber.exec(splittedUserInput[i]) ){
+        matchedNumber.push(splittedUserInput[i])
+    }
 }
