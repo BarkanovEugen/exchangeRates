@@ -15,7 +15,7 @@ function declensionPenny (number) {
 }
 
 function declensionRoublePlusPenny (number) {
-    let penny, text = ""
+    let penny ="",  text = ""
     let numberToString = number.toString()
     if( numberToString.includes(".") ) {
         penny = numberToString.split(".")[1]
@@ -211,7 +211,8 @@ class RatesInfo {
     constructor(params){
         this.code = ""
         this.curName = ""
-        this.currencyDeclension = ""
+        this.currBidDeclension = ""
+        this.currOfferDeclension = ""
         this.currValue = ""
         this.roubleCode = "643"
         this.roubleDeclension = ""
@@ -228,7 +229,7 @@ if(matchedCurrency[0]){
 
 //Запрос к микросервису
 //Вставить актуальные url
-let apiResponse = function() {
+let apiResponse = async function() {
     if( env == "IFT" ){
         const server = "urlIft"
     } else if ( env == "PREPROD" ){
@@ -243,11 +244,11 @@ let apiResponse = function() {
     };
     const response = await fetch(url, obj)
     if(response.ok){
-        const json = await.response.json();
+        const json = response.json();
         if(json.state == "ERROR"){
-            return response
+            return json
         } else {
-            return response
+            return json
         }
     }
 }
@@ -279,12 +280,67 @@ function sortingRates(str) {
                 SortingInfo.minLimit = item.amountRange.min;
                 SortingInfo.maxLimit = item.amountRange.max;
                 if (SortingInfo.maxLimit == undefined){
-                    SortingInfo.maxLimit = "бескоечности "
+                    SortingInfo.maxLimit = "бесконечности "
                 }
                 SortingInfo.scale = item.scale;
-                SortingInfo.offer = item.offer;
-                SortingInfo.bid = item.bid;
+                SortingInfo.offer = properRound(item.offer, 2);
+                SortingInfo.bid = properRound(item.bid, 2);
             }
         })
+    }
+}
+
+let text = ""
+let tts = ""
+try{
+    if(matchedCurrency[0] && matchedCurrency[0] != "643"){
+        //Одиночный курс
+        sortingRates(apiResponse)
+        if(RatesInfo.currValue == 1){
+            text += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid)
+            tts += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid)
+        } else {
+            text += RatesInfo.currValue + " " + declensionForeignCurrencies(RatesInfo.currValue, RatesInfo.code) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer*RatesInfo.currValue) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid*RatesInfo.currValue)
+            tts += RatesInfo.currValue + " " + declensionForeignCurrencies(RatesInfo.currValue, RatesInfo.code) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer*RatesInfo.currValue) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid*RatesInfo.currValue)
+        } 
+    } else {
+        //Валюта не определена, выдаём общие курсы
+        //евро
+        RatesInfo.code = "978"
+        RatesInfo.curName = declensionForeignCurrencies("1", RatesInfo.code)
+        RatesInfo.currencyDeclension = declensionForeignCurrencies("1", RatesInfo.code)
+        RatesInfo.currValue = "1"
+        sortingRates(apiResponse)
+        text += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid) + "\n"
+        tts += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid) + ". "
+        RatesInfo.code = "840"
+        RatesInfo.curName = declensionForeignCurrencies("1", RatesInfo.code)
+        RatesInfo.currencyDeclension = declensionForeignCurrencies("1", RatesInfo.code)
+        RatesInfo.currValue = "1"
+        sortingRates(apiResponse)
+    }
+} catch(error) {
+    errorInfo = error
+}
+
+function finalAnswer() {
+    if(!error){
+        return {
+            "data": {
+                "response": text,
+                "context": {
+                    "tts": tts
+                },
+            },
+        };
+    } else {
+        return {
+            "data": {
+                "response": "Произошла ошибка.",
+                "context": {
+                    "tts": "Произошла ошибка."
+                },
+            },
+        };
     }
 }
