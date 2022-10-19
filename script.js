@@ -225,3 +225,66 @@ if(matchedCurrency[0]){
     RatesInfo.currencyDeclension = declensionForeignCurrencies(matchedNumber, RatesInfo.code)
     RatesInfo.currValue = matchedNumber[0].toString()
 }
+
+//Запрос к микросервису
+//Вставить актуальные url
+let apiResponse = function() {
+    if( env == "IFT" ){
+        const server = "urlIft"
+    } else if ( env == "PREPROD" ){
+        const server = "urlPreprod"
+    } else {
+        const server = "PROD"
+    }
+    const url = server
+    const obj = {
+        method: "GET",
+        headers: {}
+    };
+    const response = await fetch(url, obj)
+    if(response.ok){
+        const json = await.response.json();
+        if(json.state == "ERROR"){
+            return response
+        } else {
+            return response
+        }
+    }
+}
+
+class SortingInfo {
+    constructor(params){
+        this.minLimit
+        this.maxLimit
+        this.scale
+        this.offer
+        this.bid
+    }
+}
+
+function sortingRates(str) {
+    let targetCurrRates = new Array();
+    if (str && str.categories && str.categories[0] && str.categories[0].rates) {
+        str.categories[0].rates.forEach(item => {
+            if(item.currency1.numCode == RatesInfo.numCode && item.currency2.numCode == RatesInfo.roubleCode ) {
+                targetCurrRates.push(item)
+            }
+        });
+    } else {
+        return "error"
+    }
+    if (targetCurrRates) {
+        targetCurrRates.forEach(item =>{
+            if ( RatesInfo.currValue >= item.amountRange.min && RatesInfo.currValue < item.amountRange.max || (RatesInfo.currValue >= item.amountRange.min) ){
+                SortingInfo.minLimit = item.amountRange.min;
+                SortingInfo.maxLimit = item.amountRange.max;
+                if (SortingInfo.maxLimit == undefined){
+                    SortingInfo.maxLimit = "бескоечности "
+                }
+                SortingInfo.scale = item.scale;
+                SortingInfo.offer = item.offer;
+                SortingInfo.bid = item.bid;
+            }
+        })
+    }
+}
