@@ -191,7 +191,6 @@ function indentifyCurrency(curr){
 //Обработка пользовательского запроса
 let userInput = "300 евро"
 let splittedUserInput = userInput.split(" ")
-let matchedNumber = []
 let matchedCurrency = []
 //Поиск упоминания валют
 for( i = 0; i < splittedUserInput.length; i++ ){
@@ -201,15 +200,11 @@ for( i = 0; i < splittedUserInput.length; i++ ){
     }
 }
 //Поиск чисел
-for ( i = 0; i < splittedUserInput.length; i++ ){
-    let regexNumber = /([0-9]+)/gm
-    if(regexNumber.exec(splittedUserInput[i]) ){
-        matchedNumber.push(splittedUserInput[i])
-    }
-}
+let regexNumber = /[\d|,|.|e|E|\+]+/g;
+let matchedNumber = userInput.match(regexNumber)
 
-if(matchedNumber.length=0){
-    matchedNumber[0] = 1
+if(matchedNumber.length == 0){
+    matchedNumber = "1"
 }
 
 class RatesInfo {
@@ -217,7 +212,7 @@ class RatesInfo {
         this.code = ""
         this.curName = ""
         this.currencyDeclension = ""
-        this.roubleValue = ""
+        this.currValue = ""
         this.roubleCode = "643"
         this.roubleDeclension = ""
         this.typeRate = "offer"
@@ -227,6 +222,6 @@ class RatesInfo {
 if(matchedCurrency[0]){
     RatesInfo.code = matchedCurrency[0]
     RatesInfo.curName = declensionForeignCurrencies("1", RatesInfo.code)
-    RatesInfo.currencyDeclension = declensionForeignCurrencies(matchedNumber[0], RatesInfo.code)
-    RatesInfo.roubleValue = matchedNumber[0]
+    RatesInfo.currencyDeclension = declensionForeignCurrencies(matchedNumber, RatesInfo.code)
+    RatesInfo.currValue = matchedNumber[0].toString()
 }
