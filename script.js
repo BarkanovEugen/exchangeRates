@@ -1,9 +1,5 @@
-class ratesInfo {
-    constructor(params){
-        this.code = ""
-        this.name = ""
-        this.currencyDeclension = ""
-    }
+function capitalizeFirstLetter(str) {
+    return str.charAt(0).toUpperCase() + String.slice(1)
 }
 
 function declensionRouble (number) {
@@ -19,7 +15,6 @@ function declensionPenny (number) {
 }
 
 function declensionRoublePlusPenny (number) {
-    let rouble = Math.trunc(number)
     let penny, text = ""
     let numberToString = number.toString()
     if( numberToString.includes(".") ) {
@@ -128,20 +123,81 @@ function declensionForeignCurrencies (number, currency) {
 }
 
 function indentifyCurrency(curr){
-    if(curr.match()){
-
+    if( curr.match(/(доллар|бакс|австрал|канад|гонкон|новозел|зеланд|сингап)/gi) ){
+        if( curr.match(/(австрал)/gi) ) {
+            return "039"
+        } else if ( curr.match(/(канад)/gi)) {
+            return "124"
+        } else if ( curr.match(/(гонкон)/gi)) {
+            return "344"
+        } else if ( curr.match(/(новозел)/gi)) {
+            return "554"
+        } else if ( curr.match(/(сингап)/gi)) {
+            return "702"
+        } else {
+            return "840"
+        }
+    } else if( curr.match(/(евро)/gi) ) {
+        return "978"
+    } else if( curr.match(/(фунт|стерлинг)/gi) ) {
+        return "826"
+    } else if( curr.match(/(драм|армянск)/gi) ) {
+        return "051"
+    } else if( curr.match(/(фунт|стерлинг)/gi) ) {
+        return "826"
+    } else if( curr.match(/(юан|китай)/gi) ) {
+        return "156"
+    } else if( curr.match(/(йен|японск|иен)/gi) ) {
+        return "392"
+    } else if( curr.match(/(тенг|тэнг|казах)/gi) ) {
+        return "398"
+    } else if( curr.match(/(крон|норве|шведс|швец|чешск|чехия)/gi) ) {
+        if ( curr.match(/(норве)/gi) ) {
+            return "578"
+        } else if ( curr.match(/(чешск|чехия)/gi) ) {
+            return "203"
+        } else {
+            return "752"
+        }
+    } else if ( curr.match(/(франк|швейц)/gi) ) {
+        return "756"
+    } else if ( curr.match(/(манат|азерб)/gi) ) {
+        return "944"
+    } else if ( curr.match(/(лир|турецк)/gi) ) {
+        return "949"
+    } else if ( curr.match(/(белорус|беларус)/gi) ) {
+        return "933"
+    } else if ( curr.match(/(белорус|беларус|рубл)/gi) ) {
+        if( curr.match(/(белорус|беларус)/gi) ){
+            return "933"
+        } else {
+            return "643"
+        }
+    } else if ( curr.match(/(песо|мексик)/gi) ) {
+        return "484"
+    } else if ( curr.match(/(ренд|рэнд|южноафрик|южно африк|южно-африк)/gi) ) {
+        return "710"
+    } else if ( curr.match(/(дирхам|оаэ|эмират)/gi) ) {
+        return "784"
+    } else if ( curr.match(/(лев|болгар)/gi) ) {
+        return "975"
+    } else if ( curr.match(/(лари|грузин)/gi) ) {
+        return "981"
+    } else if ( curr.match(/(польск|злот)/gi) ) {
+        return "985"
     }
 }
 
 //Обработка пользовательского запроса
-let userInput = ""
+let userInput = "300 евро"
 let splittedUserInput = userInput.split(" ")
-let matchedCurrency, matchedNumber = []
+let matchedNumber = []
+let matchedCurrency = []
 //Поиск упоминания валют
 for( i = 0; i < splittedUserInput.length; i++ ){
     let regexAllCurrencies = /(доллар|бакс|евро|фунт|стерлинг|драм|армянск|юан|китайск|йен|японск|иен|тенг|тэнг|казахс|крон|норве|шведс|швец|франк|швейцар|манат|азерб|лира|турец|австрал|канад|чешск|чехи|гонкон|мексик|песо|новозел|зеланд|сингапур|дирх|оаэ|эмират|белорус|беларус|болгарск|лев|льва|грузи|лар|польск|злот)/gi
     if( regexAllCurrencies.exec(splittedUserInput[i]) ){
-        matchedCurrency.push(splittedUserInput[i])
+        matchedCurrency.push(indentifyCurrency(splittedUserInput[i]))
     }
 }
 //Поиск чисел
@@ -150,4 +206,27 @@ for ( i = 0; i < splittedUserInput.length; i++ ){
     if(regexNumber.exec(splittedUserInput[i]) ){
         matchedNumber.push(splittedUserInput[i])
     }
+}
+
+if(matchedNumber.length=0){
+    matchedNumber[0] = 1
+}
+
+class RatesInfo {
+    constructor(params){
+        this.code = ""
+        this.curName = ""
+        this.currencyDeclension = ""
+        this.roubleValue = ""
+        this.roubleCode = "643"
+        this.roubleDeclension = ""
+        this.typeRate = "offer"
+    }
+}
+
+if(matchedCurrency[0]){
+    RatesInfo.code = matchedCurrency[0]
+    RatesInfo.curName = declensionForeignCurrencies("1", RatesInfo.code)
+    RatesInfo.currencyDeclension = declensionForeignCurrencies(matchedNumber[0], RatesInfo.code)
+    RatesInfo.roubleValue = matchedNumber[0]
 }
