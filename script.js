@@ -72,7 +72,7 @@ function declensionForeignCurrencies (number, currency) {
         currencyDeclensions = ["китайский юань", "китайских юаня", "китайских юаней"];
     }
     if( currency == "JPY" || currency == "392" ){
-        currencyDeclensions = ["японская йена", "японских йены", "японских йен"];
+        currencyDeclensions = ["японская иена", "японских иены", "японских иен"];
     }
     if( currency == "KZT" || currency == "398" ){
         currencyDeclensions = ["казахский тенге", "казахских тенге", "казахских тенге"];
@@ -143,8 +143,6 @@ function indentifyCurrency(curr){
         return "826"
     } else if( curr.match(/(драм|армянск)/gi) ) {
         return "051"
-    } else if( curr.match(/(фунт|стерлинг)/gi) ) {
-        return "826"
     } else if( curr.match(/(юан|китай)/gi) ) {
         return "156"
     } else if( curr.match(/(йен|японск|иен)/gi) ) {
@@ -165,8 +163,6 @@ function indentifyCurrency(curr){
         return "944"
     } else if ( curr.match(/(лир|турецк)/gi) ) {
         return "949"
-    } else if ( curr.match(/(белорус|беларус)/gi) ) {
-        return "933"
     } else if ( curr.match(/(белорус|беларус|рубл)/gi) ) {
         if( curr.match(/(белорус|беларус)/gi) ){
             return "933"
@@ -292,35 +288,38 @@ function sortingRates(str) {
 
 let text = ""
 let tts = ""
-try{
-    if(matchedCurrency[0] && matchedCurrency[0] != "643"){
-        //Одиночный курс
-        sortingRates(apiResponse)
-        if(RatesInfo.currValue == 1){
-            text += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid)
-            tts += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid)
+
+function formingFinalAnswer (){
+    try{
+        if(matchedCurrency[0] && matchedCurrency[0] != "643"){
+            //Одиночный курс
+            sortingRates(apiResponse)
+            if(RatesInfo.currValue == 1){
+                text += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid)
+                tts += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid)
+            } else {
+                text += RatesInfo.currValue + " " + declensionForeignCurrencies(RatesInfo.currValue, RatesInfo.code) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer*RatesInfo.currValue) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid*RatesInfo.currValue)
+                tts += RatesInfo.currValue + " " + declensionForeignCurrencies(RatesInfo.currValue, RatesInfo.code) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer*RatesInfo.currValue) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid*RatesInfo.currValue)
+            } 
         } else {
-            text += RatesInfo.currValue + " " + declensionForeignCurrencies(RatesInfo.currValue, RatesInfo.code) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer*RatesInfo.currValue) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid*RatesInfo.currValue)
-            tts += RatesInfo.currValue + " " + declensionForeignCurrencies(RatesInfo.currValue, RatesInfo.code) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer*RatesInfo.currValue) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid*RatesInfo.currValue)
-        } 
-    } else {
-        //Валюта не определена, выдаём общие курсы
-        //евро
-        RatesInfo.code = "978"
-        RatesInfo.curName = declensionForeignCurrencies("1", RatesInfo.code)
-        RatesInfo.currencyDeclension = declensionForeignCurrencies("1", RatesInfo.code)
-        RatesInfo.currValue = "1"
-        sortingRates(apiResponse)
-        text += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid) + "\n"
-        tts += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid) + ". "
-        RatesInfo.code = "840"
-        RatesInfo.curName = declensionForeignCurrencies("1", RatesInfo.code)
-        RatesInfo.currencyDeclension = declensionForeignCurrencies("1", RatesInfo.code)
-        RatesInfo.currValue = "1"
-        sortingRates(apiResponse)
+            //Валюта не определена, выдаём общие курсы
+            //евро
+            RatesInfo.code = "978"
+            RatesInfo.curName = declensionForeignCurrencies("1", RatesInfo.code)
+            RatesInfo.currencyDeclension = declensionForeignCurrencies("1", RatesInfo.code)
+            RatesInfo.currValue = "1"
+            sortingRates(apiResponse)
+            text += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid) + "\n"
+            tts += capitalizeFirstLetter(RatesInfo.curName) + "\n • Курс покупки: " + declensionRoublePlusPenny(SortingInfo.offer) + "\n • Курс продажи: " + declensionRoublePlusPenny(SortingInfo.bid) + ". "
+            RatesInfo.code = "840"
+            RatesInfo.curName = declensionForeignCurrencies("1", RatesInfo.code)
+            RatesInfo.currencyDeclension = declensionForeignCurrencies("1", RatesInfo.code)
+            RatesInfo.currValue = "1"
+            sortingRates(apiResponse)
+        }
+    } catch(error) {
+        errorInfo = error
     }
-} catch(error) {
-    errorInfo = error
 }
 
 function finalAnswer() {
